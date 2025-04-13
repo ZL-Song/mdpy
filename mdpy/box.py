@@ -6,19 +6,38 @@ import typing
 import numpy as np
 
 
-class FreeBox:
-  r"""The unbounded simulation box."""
+class PBCBox:
+  r"""The periodic boundary conditioned simulation box centered at the origin [0., 0., 0.])."""
 
-  def __init__(self, coordinates: np.ndarray):
-    r"""Create an unbounded simulation box.
+  def __init__(self, xdim: float, ydim: float, zdim: float, coordinates: np.ndarray):
+    r"""Create a periodic boundary conditioned simulation box centered at the origin [0., 0., 0.].
     
       Args:
+        xdim (float): The length of x dimension.
+        ydim (float): The length of y dimension.
+        zdim (float): The length of z dimension.
         coordinates (np.ndarray): The particle coordinates [N, 3].
     """
     assert isinstance(coordinates, np.ndarray), r"`coordinates` should be a NumPy array."
     assert len(coordinates.shape)  ==2, r"`coordinates` should be a NumPy array of shape [N, 3]."
     assert     coordinates.shape[1]==3, r"`coordinates` should be a NumPy array of shape [N, 3]."
     self._coordinates = np.copy(coordinates)
+    assert isinstance(xdim, float),         r"`xdim` should be a float number."
+    assert isinstance(ydim, float),         r"`ydim` should be a float number."
+    assert isinstance(zdim, float),         r"`zdim` should be a float number."
+    assert xdim>0. and ydim>0. and zdim>0., r"`xdim`, `ydim`, `zdim` should be positive."
+    self._dims = np.expand_dims(np.asarray([float(xdim), float(ydim), float(zdim)]), axis=0)# [1, 3]
+    self.coordinates = self.wrap(coordinates=self.coordinates)
+
+  @property
+  def dims(self) -> np.ndarray:
+    r"""Get the box dimensions."""
+    return np.copy(self._dims)
+
+  @property
+  def volume(self) -> float:
+    r"""Get the box volume."""
+    return np.prod(self.dims)
 
   @property
   def num_particles(self): 
@@ -37,37 +56,6 @@ class FreeBox:
     assert coordinates.shape==self._coordinates.shape, r"Inconsistent `coordinates` array shape."
     self._coordinates = np.copy(coordinates)
 
-
-class PBCBox(FreeBox):
-  r"""The periodic boundary conditioned simulation box centered at the origin [0., 0., 0.])."""
-
-  def __init__(self, xdim: float, ydim: float, zdim: float, coordinates: np.ndarray):
-    r"""Create a periodic boundary conditioned simulation box centered at the origin [0., 0., 0.].
-    
-      Args:
-        xdim (float): The length of x dimension.
-        ydim (float): The length of y dimension.
-        zdim (float): The length of z dimension.
-        coordinates (np.ndarray): The particle coordinates [N, 3].
-    """
-    FreeBox.__init__(self, coordinates=coordinates)
-    assert isinstance(xdim, float),         r"`xdim` should be a float number."
-    assert isinstance(ydim, float),         r"`ydim` should be a float number."
-    assert isinstance(zdim, float),         r"`zdim` should be a float number."
-    assert xdim>0. and ydim>0. and zdim>0., r"`xdim`, `ydim`, `zdim` should be positive."
-    self._dims = np.expand_dims(np.asarray([float(xdim), float(ydim), float(zdim)]), axis=0)# [1, 3]
-    self.coordinates = self.wrap(coordinates=self.coordinates)
-
-  @property
-  def dims(self) -> np.ndarray:
-    r"""Get the box dimensions."""
-    return np.copy(self._dims)
-
-  @property
-  def volume(self) -> float:
-    r"""Get the box volume."""
-    return np.prod(self.dims)
-  
   def wrap(self, coordinates: np.ndarray) -> np.ndarray:
     r"""Wraps the coordinates within the box.
     
@@ -101,9 +89,9 @@ class PBCBox(FreeBox):
     """
     dx_ij  = np.expand_dims(coordinates, axis=1) - np.expand_dims(coordinates, axis=0)  # [N, N, 3]
     dx_ij -= self.dims[np.newaxis, :] * np.round(dx_ij / self.dims[np.newaxis, :])      # [N, N, 3]
-    d_ij = np.linalg.norm(dx_ij, ord=2, axis=-1)                                        # [N, N]
+    d_ij: np.ndarray = np.linalg.norm(dx_ij, ord=2, axis=-1)                            # [N, N]
     if return_grad:
-      d_ij_inv = (1.-np.eye(d_ij.shape[0])) / (d_ij+np.eye(d_ij.shape[0]))  # 1/d with diag=0.
-      g_ij = 2. * np.sum(dx_ij * np.expand_dims(d_ij_inv, axis=-1), axis=1) # [N, N] dists ij+ji=2*.
+      d_ij_inv = (1.-np.eye(d_ij.shape[0])) / (d_ij+np.eye(d_ij.shape[0]))  # 1/d w/ diag=0, [N, N]
+      g_ij = 2. * np.sum(dx_ij*np.expand_dims(d_ij_inv, axis=-1), axis=1)   # [N, N] dists ij+ji=2*.
       return d_ij, g_ij
     return d_ij
