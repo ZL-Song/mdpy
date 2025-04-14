@@ -1,5 +1,5 @@
-"""Unit tests for the `mdpy.particles` module."""
-# Authors: Zilin Song
+"""Unit tests for the `mdpy.integrator` module."""
+# Authors: Zilin Song.
 
 
 import unittest
