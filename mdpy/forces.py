@@ -4,7 +4,7 @@
 
 import abc
 import numpy as np
-import mdpy.pbc as _pbc
+import mdpy.box as _box
 
 
 class Force(abc.ABC):
@@ -41,39 +41,38 @@ class LJ126(Force):
     self.sigma   = float(sigma)
     self.epsilon = float(epsilon)
   
-  def get_energy(self, coords: np.ndarray, box_dims: np.ndarray) -> float:
+  def get_energy(self, box: _box.PBCBox) -> float:
     r"""Compute the potential energy.
     
       Args:
-        coords (np.ndarray): The particle coordinates [N, 3].
-        box_dims (np.ndarray): The periodic box dimensions [1, 3].
+        box (PBCBox): The periodic boundary conditioned simulation box.
       
       Returns:
-        energy (float): The energy.
+        energy (float): The total energy.
     """
-    r_ij = _pbc.compute_minimum_image_distances(coords=coords, box_dims=box_dims) # [N, N]
-    r_ij[np.triu(r_ij, k=1)==0.] = np.inf # set the lower diagonals (k<1) to np.inf.
+    # distances: set the lower diagonals (k<1) to np.inf to prevent double counting.
+    d_ij = box.compute_distances(coordinates=box.coordinates, return_grad=False)  # [N, N]
+    d_ij[np.triu(d_ij, k=1)==0.] = np.inf
     # energy.
-    ener_6  = np.power(self.sigma/r_ij, 6.)
-    ener_lj = 4. * self.epsilon * (np.power(ener_6, 2.) - ener_6)
+    sig_r_6  = np.power(self.sigma/d_ij, 6)
+    ener_lj = 4. * self.epsilon * (np.power(sig_r_6, 2.) - sig_r_6)
     return np.sum(ener_lj)
 
 
-  def get_forces(self, coords: np.ndarray, box_dims: np.ndarray) -> np.ndarray:
+  def get_forces(self, box: _box.PBCBox) -> np.ndarray:
     r"""Compute the potential forces.
     
-      Args: 
-        coords (np.ndarray): The particle coordinates [N, 3].
-        box_dims (np.ndarray): The periodic box dimensions [1, 3].
+      Args:
+        box (PBCBox): The periodic boundary conditioned simulation box.
       
       Returns:
         forces (float): The forces [N, 3].
     """
-    r_ij, dx_ij = _pbc.compute_minimum_image_distances(coords=coords, box_dims=box_dims, return_dx_ij=True)
-    r_ij[np.eye(r_ij.shape[0])==1.] = np.inf  # set the diagonal (k=0) to np.inf.
-    # grads.
-    sigma_div_r = self.sigma / r_ij
-    grads = 24*(self.epsilon / self.sigma) * (2*np.power(sigma_div_r, 13.) - np.power(sigma_div_r, 6.)) / r_ij # [N, N]
-    grads[grads==np.inf] = 0. # set the inf (from the sigma_div_r=inf dividing r_ij=0.) elements to 0.
-    grads = np.sum(np.expand_dims(grads, axis=-1) * dx_ij, axis=1)
-    return grads
+    # distances [N, N]: set the on-diagonals (k=0) to np.inf.
+    d_ij, g_d_ij = box.compute_distances(coordinates=box.coordinates, return_grad=True)
+    d_ij[np.eye(d_ij.shape[0])==1.] = np.inf
+    # gradients
+    eps_r_1 =          self.epsilon / d_ij
+    sig_r_6 = np.power(self.sigma   / d_ij, 6)
+    g_lj = -24. * eps_r_1 * (2.*np.power(sig_r_6, 2) - sig_r_6)   # [N, N]
+    return -np.sum(np.expand_dims(g_lj, axis=2) * g_d_ij, axis=1) # [N, Ni, 1]*[N, Ni, 3] -> [N, 3]

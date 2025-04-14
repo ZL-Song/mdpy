@@ -91,7 +91,7 @@ class PBCBox:
     dx_ij -= self.dims[np.newaxis, :] * np.round(dx_ij / self.dims[np.newaxis, :])      # [N, N, 3]
     d_ij: np.ndarray = np.linalg.norm(dx_ij, ord=2, axis=-1)                            # [N, N]
     if return_grad:
-      d_ij_inv = (1.-np.eye(d_ij.shape[0])) / (d_ij+np.eye(d_ij.shape[0]))  # 1/d w/ diag=0, [N, N]
-      g_ij = 2. * np.sum(dx_ij*np.expand_dims(d_ij_inv, axis=-1), axis=1)   # [N, N] dists ij+ji=2*.
+      d_ij_ = (1.-np.eye(d_ij.shape[0])) / (d_ij+np.eye(d_ij.shape[0])) # 1/dij w/ diag=0, [N, N].
+      g_ij  = np.expand_dims(d_ij_, axis=-1) * dx_ij                    # dd_ij/dx_i, [N, N, 3].
       return d_ij, g_ij
     return d_ij
