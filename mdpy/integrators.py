@@ -10,7 +10,7 @@ import mdpy.system
 
 
 class Integrator(abc.ABC):
-  """The abstract integrator."""
+  r"""The abstract integrator."""
 
   @abc.abstractmethod
   def step(self, system: mdpy.system.System) -> None:

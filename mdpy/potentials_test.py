@@ -1,4 +1,4 @@
-"""Unit tests for the `mdpy.potentials` module."""
+r"""Unit tests for the `mdpy.potentials` module."""
 # Authors: Zilin Song.
 
 
@@ -11,7 +11,7 @@ import mdpy.potentials
 
 
 class LJ126Test(unittest.TestCase):
-  """Test cases for `mdpy.potentials.LJ126()`."""
+  r"""Test cases for `mdpy.potentials.LJ126()`."""
 
   def setUp(self):
     nparticles = 4

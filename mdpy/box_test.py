@@ -1,4 +1,4 @@
-"""Unit tests for the `mdpy.box` module."""
+r"""Unit tests for the `mdpy.box` module."""
 # Authors: Zilin Song.
 
 
@@ -20,13 +20,13 @@ class PBCBoxTest(unittest.TestCase):
     dims = np.expand_dims(np.asarray([xdim, ydim, zdim]), axis=0)
     # reusable objects.
     self.box = mdpy.box.PBCBox(xdim=xdim, ydim=ydim, zdim=zdim)
-    assert (dims==self.box.dims).all(), f"Illegal inequal dims: {dims} != {self.box.dims}"
+    assert (dims==self.box.dims).all(), r"Illegal inequal dims: {dims} != {self.box.dims}"
     self.cor_in_box  = (np.random.rand (nparticles, 3)-.5) * dims
-    assert (self.cor_in_box<= self.box.dims/2).all(), f"Illegal coordinates out box."
-    assert (self.cor_in_box>=-self.box.dims/2).all(), f"Illegal coordinates out box."
+    assert (self.cor_in_box<= self.box.dims/2).all(), r"Illegal coordinates out box."
+    assert (self.cor_in_box>=-self.box.dims/2).all(), r"Illegal coordinates out box."
     self.cor_out_box = np.random.randn(nparticles, 3)*np.random.randint(0, 10, (nparticles, 3))*dims
-    assert (self.cor_out_box>= self.box.dims/2).any(), f"Illegal coordinates in box."
-    assert (self.cor_out_box<=-self.box.dims/2).any(), f"Illegal coordinates in box."
+    assert (self.cor_out_box>= self.box.dims/2).any(), r"Illegal coordinates in box."
+    assert (self.cor_out_box<=-self.box.dims/2).any(), r"Illegal coordinates in box."
 
   def tearDown(self):
     del self.box

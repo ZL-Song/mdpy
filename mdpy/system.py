@@ -1,4 +1,4 @@
-"""The MD system."""
+r"""The MD system."""
 # Authors: Zilin Song.
 
 
@@ -9,7 +9,7 @@ import mdpy.potentials
 
 
 class System:
-  """The MD system that holds the box of particles."""
+  r"""The MD system that holds the box of particles."""
 
   def __init__(self, box: mdpy.box.PBCBox, masses: np.ndarray, coordinates: np.ndarray):
     r"""Create an MD system that holds the box of particles.

@@ -1,4 +1,4 @@
-"""Unit tests for the `mdpy.integrator` module."""
+r"""Unit tests for the `mdpy.integrator` module."""
 # Authors: Zilin Song.
 
 
@@ -64,7 +64,7 @@ class HarmonicPotential3D(mdpy.potentials.Potential):
 
 
 class LangevinIntegratorTest(unittest.TestCase):
-  """Test cases for `mdpy.integrators.LangevinIntegrator.`."""
+  r"""Test cases for `mdpy.integrators.LangevinIntegrator.`."""
   
   def setUp(self):
     self.lj126_system = mdpy.system.System(box        =mdpy.box.PBCBox(xdim=2., ydim=2., zdim=2.), 
