@@ -67,8 +67,8 @@ class PBCBox:
     dx_ij  = np.expand_dims(coordinates, axis=1) - np.expand_dims(coordinates, axis=0)  # [N, N, 3]
     dx_ij -= self.dims[np.newaxis, :] * np.round(dx_ij / self.dims[np.newaxis, :])      # [N, N, 3]
     d_ij: np.ndarray = np.linalg.norm(dx_ij, ord=2, axis=-1)                            # [N, N]
-    if return_grad:
-      d_ij_ = (1.-np.eye(d_ij.shape[0])) / (d_ij+np.eye(d_ij.shape[0])) # 1/dij w/ diag=0, [N, N].
-      g_ij  = np.expand_dims(d_ij_, axis=-1) * dx_ij                    # dd_ij/dx_i, [N, N, 3].
-      return d_ij, g_ij
-    return d_ij
+    if not return_grad: # Frobenius gradients not required.
+      return d_ij
+    d_ij_ = (1.-np.eye(d_ij.shape[0])) / (d_ij+np.eye(d_ij.shape[0])) # 1/dij w/ diag=0, [N, N].
+    g_ij  = np.expand_dims(d_ij_, axis=-1) * dx_ij                    # dd_ij/dx_i, [N, N, 3].
+    return d_ij, g_ij
