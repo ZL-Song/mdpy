@@ -29,7 +29,9 @@ class Integrator(abc.ABC):
 
 
 class LangevinIntegrator(Integrator):
-  r"""The Langevin integrator."""
+  r"""The Langevin integrator.
+    In all cases, the velocities are always half-dt behind the the coordinates in this integrator.
+  """
 
   def __init__(self, 
                timestep: float = .001, 
@@ -64,20 +66,20 @@ class LangevinIntegrator(Integrator):
       Args:
         system (mdpy.system.System): The MD system.
     """
-    # extract states.
+    # extract system states.
     m = system.masses           # [N, 1]
     x = system.coordinates      # [N, 3]
     v = system.velocities       # [N, 3]
     f = system.compute_forces() # [N, 3]
     r = np.random.randn(*f.shape)
     # integration.
-    ## integrate the +half-step velocities.
+    ## integrate v(.5dt) to v(1.5dt).
     v_half = self._a*v + self._b*f/m + self._c*r*np.sqrt(self.RT/m)
-    ## integrate the full-step coordinates.
+    ## integrate x(1.dt) to x(2.dt).
     x_full_next = x + v_half*self.dt
-    ## correct the +half-step velocities.
+    ## correct v(1.5dt).
     v_half_next = (x_full_next - x) / self.dt
-    # update states.
+    # update system states.
     system.velocities  = v_half_next
     system.coordinates = x_full_next
   
@@ -87,13 +89,13 @@ class LangevinIntegrator(Integrator):
       Args:
         system (mdpy.system.System): The MD system.
     """
-    # extract states.
+    # extract system states.
     m = system.masses
-    # initialize zero step v.
+    # initialize v(dt).
     v = np.random.normal(loc=0., scale=self.RT/m, size=(system.num_particles, 3))
-    # shift to -half step.
+    # shift v(dt) to v(.5dt).
     v -= .5*self.dt*system.compute_forces()/m
-    # update states.
+    # update system states.
     system.velocities = v
   
   def compute_kinetic_energy(self, system: mdpy.system.System) -> float:
@@ -105,10 +107,10 @@ class LangevinIntegrator(Integrator):
       Returns:
         kinetic_energy (float): The total kinetic energy.
     """
-    # extract states
+    # extract system states.
     m = system.masses
     v = system.velocities
-    # shift to zero step.
+    # shift from v(.5dt) to v(dt).
     v += .5*self.dt*system.compute_forces()/m
     # total K.
     kinetic_energy = np.sum(.5*m*v**2)
