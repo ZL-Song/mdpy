@@ -48,7 +48,7 @@ class PBCBox(unittest.TestCase):
     N = self.cor_out_box.shape[0]
     ref_x_i  = np.copy(self.cor_out_box)    # [N, 3]
     ref_x_ij = np.tile(ref_x_i, [N, 1, 1])  # [N, N, 3]
-    # ref: shift all coordinates such that all x[i, i, :] is centered at the origin.
+    # ref: shift coordinates per axis=1 such that all x[i, i, :] is centered at the origin.
     ref_x_ij -= np.repeat(np.expand_dims(ref_x_i, axis=1), repeats=N, axis=1)
     ref_x_ij  = self.box.wrap(coordinates=ref_x_ij.reshape(-1, 3)).reshape(N, N, 3)
     ref_d_ij  = np.linalg.norm(ref_x_ij, ord=2, axis=-1)
