@@ -9,7 +9,7 @@ import torch
 import mdpy.box
 
 
-class PBCBox(unittest.TestCase):
+class PBCBoxTest(unittest.TestCase):
   r"""Test cases for `mdpy.box.PBCBox()`."""
   
   def setUp(self):
@@ -55,7 +55,6 @@ class PBCBox(unittest.TestCase):
     # test.
     d_ij = self.box.compute_distances(coordinates=np.copy(self.cor_out_box), return_grad=False)
     assert np.allclose(d_ij, ref_d_ij, rtol=1e-8, atol=0.)
-
 
   def test_compute_distances_grad(self):
     # ref x_ij
