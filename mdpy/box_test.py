@@ -1,4 +1,4 @@
-r"""Unit test for the `mdpy.box` module"""
+"""Unit tests for the `mdpy.box` module."""
 # Authors: Zilin Song.
 
 
@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 import torch
 
-import mdpy.box as _box
+import mdpy.box
 
 
 class PBCBox(unittest.TestCase):
@@ -18,9 +18,8 @@ class PBCBox(unittest.TestCase):
     ydim = float(np.random.randint(1, 10))
     zdim = float(np.random.randint(1, 10))
     dims = np.expand_dims(np.asarray([xdim, ydim, zdim]), axis=0)
-    cor_init = (np.random.rand (nparticles, 3)-.5) * dims
     # reusable objects.
-    self.box = _box.PBCBox(xdim=xdim, ydim=ydim, zdim=zdim, coordinates=cor_init)
+    self.box = mdpy.box.PBCBox(xdim=xdim, ydim=ydim, zdim=zdim)
     assert (dims==self.box.dims).all(), f"Illegal inequal dims: {dims} != {self.box.dims}"
     self.cor_in_box  = (np.random.rand (nparticles, 3)-.5) * dims
     assert (self.cor_in_box<= self.box.dims/2).all(), f"Illegal coordinates out box."
@@ -34,17 +33,17 @@ class PBCBox(unittest.TestCase):
     del self.cor_in_box
     del self.cor_out_box
 
-  def test_wrap(self) -> None:
+  def test_wrap(self):
     # unwrap in box coordinates by shifting across periodic boundaries multiple times.
     coords_to_wrap  = np.copy(self.cor_in_box)
     coords_to_wrap += np.random.randint(-99, 100, coords_to_wrap.shape)*self.box.dims
-    assert (coords_to_wrap>= self.box.dims/2).any(), f"Illegal coordinates in box."
-    assert (coords_to_wrap<=-self.box.dims/2).any(), f"Illegal coordinates in box."
+    assert (coords_to_wrap>= self.box.dims/2).any()
+    assert (coords_to_wrap<=-self.box.dims/2).any()
     # test.
     coords_wrapped = self.box.wrap(coordinates=coords_to_wrap)
     assert np.allclose(coords_wrapped, self.cor_in_box, rtol=0., atol=1e-8)
 
-  def test_compute_distances(self) -> None:
+  def test_compute_distances(self):
     # ref x_ij.
     N = self.cor_out_box.shape[0]
     ref_x_i  = np.copy(self.cor_out_box)    # [N, 3]
@@ -55,10 +54,10 @@ class PBCBox(unittest.TestCase):
     ref_d_ij  = np.linalg.norm(ref_x_ij, ord=2, axis=-1)
     # test.
     d_ij = self.box.compute_distances(coordinates=np.copy(self.cor_out_box), return_grad=False)
-    assert np.allclose(d_ij, ref_d_ij, rtol=0., atol=1e-8)
-    
-  
-  def test_compute_distances_grad(self) -> None:
+    assert np.allclose(d_ij, ref_d_ij, rtol=1e-8, atol=0.)
+
+
+  def test_compute_distances_grad(self):
     # ref x_ij
     ref_x_ij = torch.tensor(self.box.wrap(coordinates=np.copy(self.cor_out_box)))
     ref_x_ij.requires_grad = True
@@ -72,5 +71,5 @@ class PBCBox(unittest.TestCase):
     # test.
     d_ij, g_ij = self.box.compute_distances(coordinates=self.cor_out_box, return_grad=True)
     g_i = np.sum(g_ij, axis=1)
-    assert np.allclose(d_ij, ref_d_ij.detach().numpy(), rtol=0., atol=1e-8)
-    assert np.allclose(g_i , ref_x_ij.grad    .numpy(), rtol=0., atol=1e-8)
+    assert np.allclose(d_ij, ref_d_ij.detach().numpy(), rtol=1e-8, atol=0.)
+    assert np.allclose(g_i , ref_x_ij.grad    .numpy(), rtol=1e-8, atol=0.)

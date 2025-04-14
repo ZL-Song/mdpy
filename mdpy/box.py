@@ -1,4 +1,4 @@
-r"""The simulation box of homogeneous particles."""
+r"""The simulation boxes."""
 # Authors: Zilin Song.
 
 
@@ -9,25 +9,19 @@ import numpy as np
 class PBCBox:
   r"""The periodic boundary conditioned simulation box centered at the origin [0., 0., 0.])."""
 
-  def __init__(self, xdim: float, ydim: float, zdim: float, coordinates: np.ndarray):
+  def __init__(self, xdim: float, ydim: float, zdim: float):
     r"""Create a periodic boundary conditioned simulation box centered at the origin [0., 0., 0.].
     
       Args:
         xdim (float): The length of x dimension.
         ydim (float): The length of y dimension.
         zdim (float): The length of z dimension.
-        coordinates (np.ndarray): The particle coordinates [N, 3].
     """
-    assert isinstance(coordinates, np.ndarray), r"`coordinates` should be a NumPy array."
-    assert len(coordinates.shape)  ==2, r"`coordinates` should be a NumPy array of shape [N, 3]."
-    assert     coordinates.shape[1]==3, r"`coordinates` should be a NumPy array of shape [N, 3]."
-    self._coordinates = np.copy(coordinates)
     assert isinstance(xdim, float),         r"`xdim` should be a float number."
     assert isinstance(ydim, float),         r"`ydim` should be a float number."
     assert isinstance(zdim, float),         r"`zdim` should be a float number."
     assert xdim>0. and ydim>0. and zdim>0., r"`xdim`, `ydim`, `zdim` should be positive."
     self._dims = np.expand_dims(np.asarray([float(xdim), float(ydim), float(zdim)]), axis=0)# [1, 3]
-    self.coordinates = self.wrap(coordinates=self.coordinates)
 
   @property
   def dims(self) -> np.ndarray:
@@ -38,23 +32,6 @@ class PBCBox:
   def volume(self) -> float:
     r"""Get the box volume."""
     return np.prod(self.dims)
-
-  @property
-  def num_particles(self): 
-    r"""The number of particles."""
-    return int(self._coordinates.shape[0])
-  
-  @property
-  def coordinates(self) -> np.ndarray:
-    r"""The particle coordinates."""
-    return np.copy(self._coordinates)
-  
-  @coordinates.setter
-  def coordinates(self, coordinates: np.ndarray) -> None:
-    r"""Set the particle coordinates."""
-    assert isinstance(coordinates, np.ndarray),        r"`coordinates` should be a NumPy array."
-    assert coordinates.shape==self._coordinates.shape, r"Inconsistent `coordinates` array shape."
-    self._coordinates = np.copy(coordinates)
 
   def wrap(self, coordinates: np.ndarray) -> np.ndarray:
     r"""Wraps the coordinates within the box.
