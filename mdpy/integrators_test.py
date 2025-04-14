@@ -77,19 +77,19 @@ class LangevinIntegratorTest(unittest.TestCase):
                                            coordinates=np.asarray([[1., -1., 0.]]), )
     self.harmo_system.add_potential(potential=HarmonicPotential3D(kx=1., ky=1., kz=0., x0=.75, y0=-.75, z0=.75))
     self.harmo_omega     = np.sqrt(1. - .05**2) # sqrt(2k/m - \gamma**2))
-    self.harmo_get_true_coords = lambda t: np.asarray([[ .75+.25*np.exp(-.05*t)*np.cos(self.harmo_omega*t), 
-                                                        -.75-.25*np.exp(-.05*t)*np.cos(self.harmo_omega*t), 
-                                                        0., ]])
-    self.harmo_get_true_velocs = lambda t: np.asarray([[-.25*np.exp(-.05*t)*(.05*np.cos(self.harmo_omega*t) + self.harmo_omega*np.sin(self.harmo_omega*t)), 
-                                                         .25*np.exp(-.05*t)*(.05*np.cos(self.harmo_omega*t) + self.harmo_omega*np.sin(self.harmo_omega*t)), 
-                                                         0., ]])
+    self.harmo_get_ref_coords = lambda t: np.asarray([[ .75+.25*np.exp(-.05*t)*np.cos(self.harmo_omega*t), 
+                                                       -.75-.25*np.exp(-.05*t)*np.cos(self.harmo_omega*t), 
+                                                       0., ]])
+    self.harmo_get_ref_velocs = lambda t: np.asarray([[-.25*np.exp(-.05*t)*(.05*np.cos(self.harmo_omega*t) + self.harmo_omega*np.sin(self.harmo_omega*t)), 
+                                                        .25*np.exp(-.05*t)*(.05*np.cos(self.harmo_omega*t) + self.harmo_omega*np.sin(self.harmo_omega*t)), 
+                                                       0., ]])
 
   def tearDown(self):
     del self.lj126_system
     del self.harmo_system
     del self.harmo_omega
-    del self.harmo_get_true_coords
-    del self.harmo_get_true_velocs
+    del self.harmo_get_ref_coords
+    del self.harmo_get_ref_velocs
 
   def test_initialize_velocity(self):
     integrator = mdpy.integrators.LangevinIntegrator(timestep=.01, friction=5., temperature=0.)
@@ -118,8 +118,8 @@ class LangevinIntegratorTest(unittest.TestCase):
     integrator = mdpy.integrators.LangevinIntegrator(timestep=.01, friction=.1, temperature=0.)
     for _ in range(2000):
       t = _ * integrator.dt
-      ref_coords = self.harmo_get_true_coords(t=t)
-      ref_velocs = self.harmo_get_true_velocs(t=t)
+      ref_coords = self.harmo_get_ref_coords(t=t)
+      ref_velocs = self.harmo_get_ref_velocs(t=t)
       # test.
       coords = self.harmo_system.coordinates
       velocs = self.harmo_system.velocities + .5 * integrator.dt * self.harmo_system.compute_forces() / self.harmo_system.masses
