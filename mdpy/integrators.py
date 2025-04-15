@@ -41,9 +41,7 @@ class Integrator(abc.ABC):
       Returns:
         temperature (float): The temperature (in K).
     """
-    # K.
     kinetic_energy = self.compute_kinetic_energy()
-    # T.
     temperature = 2.*kinetic_energy / self.system.num_dofs / mdpy.utils.IDEAL_GAS_CONSTANT_R
     return temperature
 
