@@ -50,7 +50,7 @@ class PBCBox:
                         return_grad: bool = False, 
                         ) -> typing.Union[np.ndarray, tuple[np.ndarray, np.ndarray]]:
     r"""Compute the minimum image interatomic distances (in Å) of the particle coordinates under the 
-      PBC, optionally returns the gradients to the particle coordinates (in kcal/mol/Å):
+      PBC, optionally returns the gradients to the particle coordinates (unit-less):
       
         .. math:: 
           \nabla_{\mathbf{x}_{i}} d(\mathbf{x}_{i}, \mathbf{x}_{j}) 
@@ -62,7 +62,7 @@ class PBCBox:
 
       Returns:
         distances (np.ndarray): The minimum image interatomic distances (in Å) [N, N].
-        gradients (np.ndarray): The particle coordinates gradients (in kcal/mol/Å) [N, N, 3].
+        gradients (np.ndarray): The particle coordinates gradients (unit-less) [N, N, 3].
     """
     dx_ij  = np.expand_dims(coordinates, axis=1) - np.expand_dims(coordinates, axis=0)  # [N, N, 3]
     dx_ij -= self.dims[np.newaxis, :] * np.round(dx_ij / self.dims[np.newaxis, :])      # [N, N, 3]
