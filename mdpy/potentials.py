@@ -32,8 +32,8 @@ class LJ126(Potential):
     r"""Create a Lennard-Jones (LJ) 12-6 potential.
     
       Args:
-        sigma   (float): The distance between two particles when the LJ 12-6 potential is zero.
-        epsilon (float): The depth of the LJ 12-6 potential well.
+        sigma   (float): The distance (in Å) between two particles when the LJ 12-6 potential is 0.
+        epsilon (float): The depth of the LJ 12-6 potential well (in kcal/mol).
     """
     assert isinstance(sigma, float),   r"`sigma` should be a float number."
     assert            sigma>0.,        r"`sigma` should be positive."
@@ -46,11 +46,11 @@ class LJ126(Potential):
     r"""Compute the potential energy.
     
       Args:
-        coordinates (np.ndarray): The particle coordinates [N, 3].
+        coordinates (np.ndarray): The particle coordinates (in Å) [N, 3].
         box (mdpy.box.PBCBox): The periodic boundary conditioned box.
       
       Returns:
-        energy (float): The total energy.
+        energy (float): The total energy (in kcal/mol).
     """
     # distances: set the lower diagonals (k<1) to np.inf to prevent double counting.
     d_ij = box.compute_distances(coordinates=coordinates, return_grad=False)  # [N, N]
@@ -64,11 +64,11 @@ class LJ126(Potential):
     r"""Compute the potential forces.
     
       Args:
-        coordinates (np.ndarray): The particle coordinates [N, 3].
+        coordinates (np.ndarray): The particle coordinates (in Å) [N, 3].
         box (mdpy.box.PBCBox): The periodic boundary conditioned box.
       
       Returns:
-        forces (float): The forces [N, 3].
+        forces (float): The forces (in kcal/mol/Å) [N, 3].
     """
     # distances [N, N]: set the on-diagonals (k=0) to np.inf.
     d_ij, g_d_ij = box.compute_distances(coordinates=coordinates, return_grad=True)

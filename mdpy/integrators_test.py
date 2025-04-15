@@ -18,12 +18,12 @@ class HarmonicPotential3D(mdpy.potentials.Potential):
     r"""Create a 3D harmonic oscillator potential centered at [0., 0., 0.].
     
       Args:
-        kx (float): Force constant on x dim.
-        ky (float): Force constant on y dim.
-        kz (float): Force constant on z dim.
-        x0 (float): Equilibrium position on x dim.
-        y0 (float): Equilibrium position on y dim.
-        z0 (float): Equilibrium position on z dim.
+        kx (float): Force constant on the x dimension (in kcal/mol/Å**2).
+        ky (float): Force constant on the y dimension (in kcal/mol/Å**2).
+        kz (float): Force constant on the z dimension (in kcal/mol/Å**2).
+        x0 (float): Equilibrium position on the x dimension.
+        y0 (float): Equilibrium position on the y dimension.
+        z0 (float): Equilibrium position on the z dimension.
     """
     assert isinstance(kx, float), r"`kx` should be a float number."
     assert            kx>=0.,     r"`kx` should be non-negative."
@@ -41,11 +41,11 @@ class HarmonicPotential3D(mdpy.potentials.Potential):
     r"""Compute the potential energy.
     
       Args:
-        coordinates (np.ndarray): The particle coordinates [N, 3].
+        coordinates (np.ndarray): The particle coordinates (in Å) [N, 3].
         box (mdpy.box.PBCBox): unused.
       
       Returns:
-        energy (float): The total energy.
+        energy (float): The total energy (in kcal/mol).
     """
     return np.sum(self.ks * (coordinates-self.x0)**2)
   
@@ -53,11 +53,11 @@ class HarmonicPotential3D(mdpy.potentials.Potential):
     r"""Compute the potential forces.
     
       Args:
-        coordinates (np.ndarray): The particle coordinates [N, 3].
+        coordinates (np.ndarray): The particle coordinates (in Å) [N, 3].
         box (mdpy.box.PBCBox): unused.
         
       Returns:
-        forces (float): The forces [N, 3].
+        forces (float): The forces (in kcal/mol/Å) [N, 3].
     """
     grad = 2. * self.ks * (coordinates-self.x0)
     return -grad
@@ -67,9 +67,9 @@ class LangevinIntegratorTest(unittest.TestCase):
   r"""Test cases for `mdpy.integrators.LangevinIntegrator.`."""
   
   def setUp(self):
-    self.lj126_system = mdpy.system.System(box        =mdpy.box.PBCBox(xdim=2., ydim=2., zdim=2.), 
-                                           masses     =np.ones((100, ))*2., 
-                                           coordinates=np.random.randn(100, 3), )
+    self.lj126_system = mdpy.system.System(box        =mdpy.box.PBCBox(xdim=10., ydim=10., zdim=10.), 
+                                           masses     =np.ones((20, ))*2., 
+                                           coordinates=np.random.randn(20, 3), )
     self.lj126_system.add_potential(potential=mdpy.potentials.LJ126(sigma=1., epsilon=1.))
 
     self.harmo_system = mdpy.system.System(box        =mdpy.box.PBCBox(xdim=1e5, ydim=1e5, zdim=1e5), 
@@ -92,30 +92,30 @@ class LangevinIntegratorTest(unittest.TestCase):
     del self.harmo_get_ref_velocs
 
   def test_initialize_velocity(self):
-    integrator = mdpy.integrators.LangevinIntegrator(timestep=.01, friction=5., temperature=0.)
+    integrator = mdpy.integrators.LangevinIntegrator(system=self.lj126_system, timestep=.01, friction=5., temperature=0.)
     for _ in range(100):
       # change coordinates.
       self.lj126_system.coordinates = np.random.randn(self.lj126_system.num_particles, 3) * np.random.randint(1, 1000)
       # init velocities.
-      integrator.initialize_velocites(system=self.lj126_system)
+      integrator.initialize_velocities(temperature=0.)
       # forward shift: v(0.dt) = v(-.5dt) + .5 dt f / m
       v = self.lj126_system.velocities + .5 * integrator.dt * self.lj126_system.compute_forces() / self.lj126_system.masses
       assert (v == np.zeros(v.shape)).all()
 
   def test_energy_conservation(self):
-    integrator = mdpy.integrators.LangevinIntegrator(timestep=.01, friction=0., temperature=0.)
+    integrator = mdpy.integrators.LangevinIntegrator(system=self.harmo_system, timestep=.01, friction=0., temperature=0.)
     # initialize md.
     for _ in range(100):
-      integrator.step(system=self.harmo_system)
+      integrator.step()
     # test total energy conserved.
-    ener_init = integrator.compute_kinetic_energy(system=self.harmo_system) + self.harmo_system.compute_potential_energy()
+    ener_init = integrator.compute_kinetic_energy() + self.harmo_system.compute_potential_energy()
     for _ in range(2000):
-      ener = integrator.compute_kinetic_energy(system=self.harmo_system) + self.harmo_system.compute_potential_energy()
+      ener = integrator.compute_kinetic_energy() + self.harmo_system.compute_potential_energy()
       assert np.abs(ener-ener_init)<5e-6, ener-ener_init
-      integrator.step(system=self.harmo_system)
+      integrator.step()
 
   def test_harmonic_oscillator_solution(self):
-    integrator = mdpy.integrators.LangevinIntegrator(timestep=.01, friction=.1, temperature=0.)
+    integrator = mdpy.integrators.LangevinIntegrator(system=self.harmo_system, timestep=.01, friction=.1, temperature=0.)
     for _ in range(2000):
       t = _ * integrator.dt
       ref_coords = self.harmo_get_ref_coords(t=t)
@@ -126,4 +126,4 @@ class LangevinIntegratorTest(unittest.TestCase):
       # test atol=.02: https://github.com/openmm/openmm/blob/master/tests/TestLangevinIntegrator.h.
       assert np.allclose(coords, ref_coords, rtol=0., atol=.02)
       assert np.allclose(velocs, ref_velocs, rtol=0., atol=.02)
-      integrator.step(system=self.harmo_system)
+      integrator.step()
