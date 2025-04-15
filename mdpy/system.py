@@ -21,7 +21,7 @@ class System:
         coordinates (np.ndarray):      The particle coordinates (in Å) [N, 3].
     """
     # box
-    assert isinstance(box, mdpy.box.PBCBox), r"`box` should be an `mdpy.box.PBCBox` instance."
+    assert isinstance(box, mdpy.box.PBCBox), r"`box` should be an instance of `mdpy.box.PBCBox`."
     self._box = box
     # masses.
     assert isinstance(masses, np.ndarray), r"`masses` should be an array."
@@ -33,7 +33,7 @@ class System:
     self._ndofs = int(self._natoms * 3.)
     # coordinates
     assert isinstance(coordinates, np.ndarray), r"`coordinates` should be an array."
-    assert coordinates.shape==(self._natoms, 3),     r"`coordinates` should be an array of shape [N, 3]."
+    assert coordinates.shape==(self.natoms, 3), r"`coordinates` should be an array of shape [N, 3]."
     self._coordinates = np.copy(coordinates)
     # velocities.
     self._velocities  = np.zeros(self.coordinates.shape)
@@ -67,8 +67,8 @@ class System:
   @coordinates.setter
   def coordinates(self, val: np.ndarray) -> None:
     r"""Set the particle coordinates (in Å)."""
-    assert isinstance(val, np.ndarray),        r"`coordinates` is a NumPy array."
-    assert val.shape==(self.num_particles, 3), r"`coordinates` is a array of shape [N, 3]."
+    assert isinstance(val, np.ndarray),        r"`coordinates` should be an array."
+    assert val.shape==(self.num_particles, 3), r"`coordinates` should be an array of shape [N, 3]."
     self._coordinates = np.copy(val)
 
   @property
@@ -77,8 +77,8 @@ class System:
     return np.copy(self._velocities)
   @velocities.setter
   def velocities(self, val: np.ndarray) -> None:
-    assert isinstance(val, np.ndarray),        r"`coordinates` is a NumPy array."
-    assert val.shape==(self.num_particles, 3), r"Inconsistent `coordinates` array shape."
+    assert isinstance(val, np.ndarray),        r"`velocities` should be an array."
+    assert val.shape==(self.num_particles, 3), r"`velocities` should be an array of shape [N, 3]."
     self._velocities = np.copy(val)
   
   def add_potential(self, potential: mdpy.potentials.Potential) -> None:

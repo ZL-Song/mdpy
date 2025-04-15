@@ -18,7 +18,8 @@ class Integrator(abc.ABC):
       Args:
         system (mdpy.system.System): The MD system.
     """
-    assert isinstance(system, mdpy.system.System), r"`system` should be `mdpy.system.System()`."
+    assert isinstance(system, mdpy.system.System), \
+      r"`system` should be an instance of `mdpy.system.System`."
     self.system = system
 
   @abc.abstractmethod

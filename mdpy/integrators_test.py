@@ -26,10 +26,10 @@ class HarmonicPotential3D(mdpy.potentials.Potential):
         z0 (float): Equilibrium position on the z dimension.
     """
     assert isinstance(kx, float), r"`kx` should be a float number."
-    assert            kx>=0.,     r"`kx` should be non-negative."
     assert isinstance(ky, float), r"`ky` should be a float number."
-    assert            ky>=0.,     r"`ky` should be non-negative."
     assert isinstance(kz, float), r"`kz` should be a float number."
+    assert            kx>=0.,     r"`kx` should be non-negative."
+    assert            ky>=0.,     r"`ky` should be non-negative."
     assert            kz>=0.,     r"`kz` should be non-negative."
     self.ks = np.asarray([[kx, ky, kz]])
     assert isinstance(x0, float), r"`x0` should be a float number."
