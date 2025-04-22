@@ -32,8 +32,8 @@ class System:
     # n_dofs.
     self._ndofs = int(self._natoms * 3.)
     # coordinates
-    assert isinstance(coordinates, np.ndarray), r"`coordinates` should be an array."
-    assert coordinates.shape==(self.natoms, 3), r"`coordinates` should be an array of shape [N, 3]."
+    assert isinstance(coordinates, np.ndarray),  r"`coordinates` should be an array."
+    assert coordinates.shape==(self._natoms, 3), r"`coordinates` should be an array of shape [N, 3]."
     self._coordinates = np.copy(coordinates)
     # velocities.
     self._velocities  = np.zeros(self.coordinates.shape)
