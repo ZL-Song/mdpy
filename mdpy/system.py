@@ -6,7 +6,6 @@ import numpy as np
 
 import mdpy.box
 import mdpy.potentials
-import mdpy.utils
 
 
 class System:
