@@ -6,6 +6,7 @@ import unittest
 import numpy as np
 
 import mdpy.box
+import mdpy.topology
 import mdpy.potentials
 import mdpy.integrators
 import mdpy.system
@@ -68,12 +69,12 @@ class LangevinIntegratorTest(unittest.TestCase):
   
   def setUp(self):
     self.lj126_system = mdpy.system.System(box        =mdpy.box.PBCBox(xdim=10., ydim=10., zdim=10.), 
-                                           masses     =np.ones((20, ))*2., 
+                                           topology   =mdpy.topology.HomogeneousIdealGas(num_particles=20, mass=2.), 
                                            coordinates=np.random.randn(20, 3), )
     self.lj126_system.add_potential(potential=mdpy.potentials.LJ126(sigma=1., epsilon=1.))
 
     self.harmo_system = mdpy.system.System(box        =mdpy.box.PBCBox(xdim=1e5, ydim=1e5, zdim=1e5), 
-                                           masses     =np.ones((1, ))*2., 
+                                           topology   =mdpy.topology.HomogeneousIdealGas(num_particles=1, mass=2.), 
                                            coordinates=np.asarray([[1., -1., 0.]]), )
     self.harmo_system.add_potential(potential=HarmonicPotential3D(kx=1., ky=1., kz=0., x0=.75, y0=-.75, z0=.75))
     self.harmo_omega     = np.sqrt(1. - .05**2) # sqrt(2k/m - \gamma**2))
@@ -95,11 +96,11 @@ class LangevinIntegratorTest(unittest.TestCase):
     integrator = mdpy.integrators.LangevinIntegrator(system=self.lj126_system, timestep=.01, friction=5., temperature=0.)
     for _ in range(100):
       # change coordinates.
-      self.lj126_system.coordinates = np.random.randn(self.lj126_system.num_particles, 3) * np.random.randint(1, 1000)
+      self.lj126_system.coordinates = np.random.randn(self.lj126_system.topology.num_particles, 3) * np.random.randint(1, 1000)
       # init velocities.
       integrator.initialize_velocities(temperature=0.)
       # forward shift: v(0.dt) = v(-.5dt) + .5 dt f / m
-      v = self.lj126_system.velocities + .5 * integrator.dt * self.lj126_system.compute_forces() / self.lj126_system.masses
+      v = self.lj126_system.velocities + .5 * integrator.dt * self.lj126_system.compute_forces() / self.lj126_system.topology.masses
       assert (v == np.zeros(v.shape)).all()
 
   def test_energy_conservation(self):
@@ -122,7 +123,7 @@ class LangevinIntegratorTest(unittest.TestCase):
       ref_velocs = self.harmo_get_ref_velocs(t=t)
       # test.
       coords = self.harmo_system.coordinates
-      velocs = self.harmo_system.velocities + .5 * integrator.dt * self.harmo_system.compute_forces() / self.harmo_system.masses
+      velocs = self.harmo_system.velocities + .5 * integrator.dt * self.harmo_system.compute_forces() / self.harmo_system.topology.masses
       # test atol=.02: https://github.com/openmm/openmm/blob/master/tests/TestLangevinIntegrator.h.
       assert np.allclose(coords, ref_coords, rtol=0., atol=.02)
       assert np.allclose(velocs, ref_velocs, rtol=0., atol=.02)

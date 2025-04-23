@@ -43,7 +43,7 @@ class Integrator(abc.ABC):
         temperature (float): The temperature (in K).
     """
     kinetic_energy = self.compute_kinetic_energy()
-    temperature = 2.*kinetic_energy / self.system.num_dofs / mdpy.utils.IDEAL_GAS_CONSTANT_R
+    temperature = 2.*kinetic_energy / self.system.topology.num_dofs / mdpy.utils.IDEAL_GAS_CONSTANT
     return temperature
 
 
@@ -84,12 +84,12 @@ class LangevinIntegrator(Integrator):
     self._a = np.exp(-self.gamma*self.dt)
     self._b = self.dt if self.gamma==0. else (1.-np.exp(-self.gamma*self.dt)) / self.gamma
     self._c = np.sqrt(1.-np.exp(-2.*self.gamma*self.dt))
-    self.RT = mdpy.utils.IDEAL_GAS_CONSTANT_R * temperature
+    self.RT = mdpy.utils.IDEAL_GAS_CONSTANT * temperature
 
   def step(self) -> None:
     r"""Advance the integration by one timestep."""
     # extract system states.
-    m = self.system.masses           # [N, 1]
+    m = self.system.topology.masses  # [N, 1]
     x = self.system.coordinates      # [N, 3]
     v = self.system.velocities       # [N, 3]
     f = self.system.compute_forces() # [N, 3]
@@ -111,12 +111,12 @@ class LangevinIntegrator(Integrator):
       Args:
         temperature (float): The temperature (in K).
     """
-    RT = mdpy.utils.IDEAL_GAS_CONSTANT_R * temperature
+    RT = mdpy.utils.IDEAL_GAS_CONSTANT * temperature
     # extract system states.
-    m = self.system.masses
+    m = self.system.topology.masses
     f = self.system.compute_forces()
     # initialize v(dt).
-    v = np.random.normal(loc=0., scale=RT/m, size=(self.system.num_particles, 3))
+    v = np.random.normal(loc=0., scale=RT/m, size=(self.system.topology.num_particles, 3))
     # shift v(dt) to v(.5dt).
     v -= .5*self.dt*f/m
     # update system states.
@@ -129,7 +129,7 @@ class LangevinIntegrator(Integrator):
         kinetic_energy (float): The kinetic energy (in kcal/mol).
     """
     # extract system states.
-    m = self.system.masses
+    m = self.system.topology.masses
     v = self.system.velocities
     f = self.system.compute_forces()
     # shift v(.5dt) to v(dt).
