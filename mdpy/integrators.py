@@ -48,12 +48,8 @@ class Integrator(abc.ABC):
 
 
 class LangevinIntegrator(Integrator):
-  r"""The Langevin leap-frog integrator. 
-    The velocities are always half-dt behind the coordinates in this integrator. 
-    The `compute_kinetic_energy()` function in the `mdpy.system.System()` instance is automatically 
-    replaced by the function with the same name implemented in this class.
-    The `compute_temperature()` function in the `mdpy.system.System()` instance is automatically 
-    replaced by the function with the same name implemented in this class.
+  r"""The Langevin leap-frog integrator. The velocities are always half-dt behind the coordinates in
+    this integrator. 
   """
 
   def __init__(self, 
@@ -87,7 +83,7 @@ class LangevinIntegrator(Integrator):
     self.RT = mdpy.utils.IDEAL_GAS_CONSTANT * temperature
 
   def step(self) -> None:
-    r"""Advance the integration by one timestep."""
+    r"""Advance the integration by one time step."""
     # extract system states.
     m = self.system.topology.masses  # [N, 1]
     x = self.system.coordinates      # [N, 3]
