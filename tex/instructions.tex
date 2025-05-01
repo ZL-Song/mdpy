@@ -98,7 +98,12 @@ The left part (orange region) is the File Explorer and the right part (blue regi
 
 在文件管理器中
 \begin{itemize}
-  \item `class\_data' 文件夹包含一些课程资料以及作业模板，学员仅拥有只读权限(学员不可直接编辑该文件夹中的文件)；
+  \item `class\_data' 文件夹包含一些课程资料以及作业模板，学员仅拥有只读权限(学员不可直接编辑该文件夹中的文件/编辑后无法保存)；
+    \begin{itemize}
+      \item `class\_data/assignments' 文件夹包含每次课程作业的模板文件，学员可在 `data' 文件夹下复制每次作业的对应模板进行编辑；
+      \item `class\_data/mdpy' 文件夹包含\textsc{MDPy}程序的源代码，是基于Python实现的分子动力学模拟基础代码模块。学员可在 `data' 文件夹下复制该文件夹进行编辑；
+      \item `class\_data/md\_demo.ipynb' 文件是利用\textsc{MDPy}模块实现一个简单分子动力学模拟的JupyterLab示例（JupyterLab使用说明见~\hyperref[sec:ref]{参考资料 References}），学员可自主运行各代码模块以查看模拟结果和计算细节。
+    \end{itemize}
   \item `data' 文件夹为学员的作业区，学员拥有读写权限。
 \end{itemize}
 
@@ -120,7 +125,7 @@ The left part (orange region) is the File Explorer and the right part (blue regi
 以第一次作业为例，学员应当进行如下准备工作：\\
 1. 将 `class\_data/mdpy' 文件夹整体复制到 `data' 文件夹下；\\
 2. 将 `class\_data/assignments' 文件夹下的当次作业的 `1\_integrators.ipynb' 文件复制到 `data' 文件夹下；\\
-3. 根据 `data/1\_integrators.ipynb' 中的指示，在其中完成第一次作业。
+3. 根据 `data/1\_integrators.ipynb' 中的指示，在其中完成第一次作业。其中\textbf{1}-\textbf{3}为作业内容介绍及\textsc{MDPy}程序说明，\textbf{4}为作业示例。学员应在\textbf{5. Your Answer}部分根据作业要求完成作业，具体包括\textbf{5.1} 预备实现的积分器及其公式推导（Markdown语法）、\textbf{5.2} Python 代码实现及\textbf{5.3} 积分器使用测试。学员应在代码中提供清晰的注释以说明实现细节。\\
 
 \centerline{\includegraphics[scale=0.8]{figs/system1.jpg}}
 
@@ -130,10 +135,23 @@ The left part (orange region) is the File Explorer and the right part (blue regi
 
 \section*{注意事项 Important notes}
 
-1. 如果学员保存了同一次作业的多个副本，主讲教师将仅查看编辑时间最晚的作业副本。\\
-2. 如果学员在当次作业的截止时间后修改了作业文件，则需要通知主讲教师，否则我们将仅查看截止时间前的作业文件。\\
-3. 如果学员的实现涉及对\textsc{MDPy}源代码的修改，则需要给出详细的修改位置及原因，否则将被视为实现错误。\\
-4. 如果学员在完成作业的过程中受益于他人的指导或讨论，则需要在作业中明确致谢，这将不会对作业评价产生负面影响。\\
-5. 禁止共享账号或代替他人完成作业 Account sharing or proxy submissions are strictly prohibited。
+\begin{enumerate}
+  \item 如果学员保存了同一次作业的多个副本，\textbf{主讲教师将仅查看编辑时间最晚的作业副本}。
+  \item 如果学员在当次作业的截止时间后修改了作业文件，则需要通知主讲教师，\textbf{否则我们将仅查看截止时间前的作业文件}。
+  \item 如果学员的实现涉及对\textsc{MDPy}源代码的修改，\textbf{则需要给出详细的修改位置及原因，否则将被视为实现错误}。
+  \item 如果学员在完成作业的过程中受益于他人的指导或讨论，\textbf{则需要在作业中明确致谢}，这将不会对作业评价产生负面影响。
+  \item \textbf{禁止共享账号或代替他人完成作业 Account sharing or proxy submissions are strictly prohibited}。
+  \item {\bf \color{myred} 截止时间前请务必确认所有待提交作业内容已置于`data'目录下！！！}
+\end{enumerate}
+
+\section*{参考资料 References}
+\phantomsection\label{sec:ref}
+\begin{itemize}
+  \item \href{https://jupyterlab.readthedocs.io/en/latest/user/}{JupyterLab使用指南}
+  \item \href{https://medium.com/@tuenguyends/start-your-first-project-with-jupyter-lab-84f5b78b4522#:~:text=Create%20your%20first%20notebook}{JupyterLab使用示例}
+  \item \href{https://markdown.com.cn/}{Markdown教程}，或在Jupyter Notebook界面中点击`Help'下拉菜单中的`Markdown Reference'
+  \item \href{https://simpletex.cn/ai/latex_ocr}{SimpleTex}，可帮助将图片或照片中的公式转换为Markdown语法。
+  \item \href{https://liaoxuefeng.com/books/python/basic/index.html}{Python基础教程}
+\end{itemize}
 
 \end{document}
